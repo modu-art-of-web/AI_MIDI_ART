@@ -65,23 +65,14 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
- const synth = new Tone.PolySynth(8, Tone.Synth, {
-			"oscillator": {
-				"type": "sine3"
-			},
-			"envelope": {
-				"attack": 0.03,
-				"decay": 0.1,
-				"sustain": 0.2,
-				"release": 0.6
-			}
-		}).toMaster();
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__midi_track_js__ = __webpack_require__(1);
 
-function playNote(time, event){
-	synth.triggerAttackRelease(event.name, event.duration, time, event.velocity);
-}
+
+
 
 const button = document.querySelector("button");
 button.addEventListener("click", function(){
@@ -93,19 +84,48 @@ button.addEventListener("click", function(){
 		button.textContent = "STOP";
 	}
 });
-MidiConvert.load("../res/MIDI_sample.mid").then(function(midi){
 
-	// play right and left hand with a poly synth
-	const rightHand = midi.get("Piano").notes;
-	const leftHand = midi.get("Bass").notes;
-	// make sure you set the tempo before you schedule the events
+
+//Midi file Load... and...
+
+MidiConvert.load("res/MIDI_sample.mid").then(function(midi){
+
+	//You have to check tracks for making notes.
+	console.log(midi);
+
+	var tracks = [];
+
+	// play each tracks with each sound
+	midi.tracks.forEach((track)=>{
+		tracks.push(new __WEBPACK_IMPORTED_MODULE_0__midi_track_js__["a" /* default */](4, Tone.Synth, track.notes));
+	})
+	
 	Tone.Transport.bpm.value = midi.bpm;
 	Tone.Transport.timeSignature = midi.timeSignature;
-	const rightHandPart = new Tone.Part(playNote, rightHand).start(0);
-	const leftHandPart = new Tone.Part(playNote, leftHand).start(0);
+
 	button.classList.add("active")
 });
 
+
+/***/ }),
+/* 1 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+
+class Track extends Tone.PolySynth{
+    constructor(polyphony, voice, notes) {
+        super(polyphony, voice);
+        this.track = new Tone.Part(this.playNote.bind(this), notes).start(0);
+        this.master = this.toMaster();
+    }
+
+    playNote(time, event) {
+        this.master.triggerAttackRelease(event.name, event.duration, time, event.velocity);
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Track;
+;
 
 /***/ })
 /******/ ]);
