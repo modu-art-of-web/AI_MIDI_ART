@@ -6,10 +6,12 @@ import Canvas from "./visual/canvas.js"
 
 class Visual {
     constructor(tracks) {
+        //Setup Size for render
+        this.resolution = {width : 900, height : 900};
 
         //Setup Renderer
         this.rdrr = new THREE.WebGLRenderer({ alpha: false, antialias: true });
-        this.rdrr.setSize(window.innerWidth, window.innerHeight);
+        this.rdrr.setSize(this.resolution.width, this.resolution.height);
         document.body.appendChild(this.rdrr.domElement);
 
         //Setup perlin noise
@@ -17,15 +19,15 @@ class Visual {
 
         //Setup Scene & add brushes
         this.scene = new THREE.Scene();
-        this.scene.add(new Brush({x : -10.0, y : 0.0}, this.rdrr, this.perlin));
-        this.scene.add(new Brush({x : - 6.0, y : 0.0}, this.rdrr, this.perlin));
-        this.scene.add(new Brush({x : - 2.0, y : 0.0}, this.rdrr, this.perlin));
-        this.scene.add(new Brush({x :   2.0, y : 0.0}, this.rdrr, this.perlin));
-        this.scene.add(new Brush({x :   6.0, y : 0.0}, this.rdrr, this.perlin));
-        this.scene.add(new Brush({x :  10.0, y : 0.0}, this.rdrr, this.perlin));
+        this.scene.add(new Brush({x : - 6.25, y : 2.0}, this.rdrr, this.perlin));
+        this.scene.add(new Brush({x : - 3.75, y : 2.0}, this.rdrr, this.perlin));
+        this.scene.add(new Brush({x : - 1.25, y : 2.0}, this.rdrr, this.perlin));
+        this.scene.add(new Brush({x :   1.25, y : 2.0}, this.rdrr, this.perlin));
+        this.scene.add(new Brush({x :   3.75, y : 2.0}, this.rdrr, this.perlin));
+        this.scene.add(new Brush({x :   6.25, y : 2.0}, this.rdrr, this.perlin));
 
         //Setup Camera
-        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1.0, 1000.0);
+        this.camera = new THREE.PerspectiveCamera(45, this.resolution.width/ this.resolution.height, 1.0, 1000.0);
         this.camera.position.z = 20.0;
 
         //Setup Canvas 

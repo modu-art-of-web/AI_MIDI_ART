@@ -60,175 +60,11 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__midi_track_js__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__visual_js__ = __webpack_require__(2);
-
-
-
-
-
-const button = document.querySelector("button");
-button.addEventListener("click", function(){
-	if (Tone.Transport.state === "started"){
-		Tone.Transport.stop();
-		button.textContent = "START";
-	} else {
-		Tone.Transport.start("+0.1", 0);
-		button.textContent = "STOP";
-	}
-});
-
-
-//Midi file Load... and...
-var Miditracks = [];
-MidiConvert.load("res/MIDI_sample.mid").then(function(midi){
-
-	//You have to check tracks for making notes.
-	console.log(midi);
-
-	// play each tracks with each sound
-	midi.tracks.forEach((track)=>{
-		Miditracks.push(new __WEBPACK_IMPORTED_MODULE_0__midi_track_js__["a" /* default */](4, Tone.Synth, track.notes));
-	})
-	
-	Tone.Transport.bpm.value = midi.bpm;
-	Tone.Transport.timeSignature = midi.timeSignature;
-	button.classList.add("active")
-});
-
-
-
-//Visual Effect
-(function() {
-    this.setup();
-    this.animate(0, 0);
-}).bind({
-    setup : function() {
-        this.main = new __WEBPACK_IMPORTED_MODULE_1__visual_js__["a" /* default */](Miditracks);
-    },
-
-    update : function(t, dt) {
-        this.main.update(t, dt);
-    },
-
-    animate : function(oldt, nowt) {
-        this.update(nowt * 0.001, (nowt - oldt) * 0.001);
-        requestAnimationFrame(this.animate.bind(this, nowt));
-    }
-})();
-
-/***/ }),
-/* 1 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-
-class Track extends Tone.PolySynth{
-    constructor(polyphony, voice, notes) {
-        super(polyphony, voice);
-        this.track = new Tone.Part(this.playNote.bind(this), notes).start(0);
-        this.master = this.toMaster();
-        
-        this.event = {midi : 0};
-    }
-
-    playNote(time, event) {
-        this.master.triggerAttackRelease(event.name, event.duration, time, event.velocity);
-        this.event = event;
-        setTimeout(
-            ((midi)=>{ 
-                if(this.event.midi == midi) this.event = {midi : 0};
-            }).bind(this, this.event.midi), 
-            event.duration * 1000.0);
-    }
-
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Track;
-;
-
-/***/ }),
-/* 2 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__perlin_perlin_js__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__visual_canvas_js__ = __webpack_require__(8);
-
-
-
-
-
-
-class Visual {
-    constructor(tracks) {
-
-        //Setup Renderer
-        this.rdrr = new __WEBPACK_IMPORTED_MODULE_0_three__["o" /* WebGLRenderer */]({ alpha: false, antialias: true });
-        this.rdrr.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(this.rdrr.domElement);
-
-        //Setup perlin noise
-        this.perlin = new __WEBPACK_IMPORTED_MODULE_1__perlin_perlin_js__["a" /* default */]({rdrr : this.rdrr, gridWidth : 16, gridHeight : 16, texWidth : 64, texHeight : 64});
-
-        //Setup Scene & add brushes
-        this.scene = new __WEBPACK_IMPORTED_MODULE_0_three__["k" /* Scene */]();
-        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x : -10.0, y : 0.0}, this.rdrr, this.perlin));
-        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x : - 6.0, y : 0.0}, this.rdrr, this.perlin));
-        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x : - 2.0, y : 0.0}, this.rdrr, this.perlin));
-        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x :   2.0, y : 0.0}, this.rdrr, this.perlin));
-        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x :   6.0, y : 0.0}, this.rdrr, this.perlin));
-        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x :  10.0, y : 0.0}, this.rdrr, this.perlin));
-
-        //Setup Camera
-        this.camera = new __WEBPACK_IMPORTED_MODULE_0_three__["h" /* PerspectiveCamera */](45, window.innerWidth / window.innerHeight, 1.0, 1000.0);
-        this.camera.position.z = 20.0;
-
-        //Setup Canvas 
-        //it's made for brush effect (unerasing)
-        this.canvas = new __WEBPACK_IMPORTED_MODULE_3__visual_canvas_js__["a" /* default */](this.rdrr, this.perlin);
-
-        //Get Tracks for Pitches
-        this.tracks = tracks;
-    }   
-
-    update(t, dt) {
-        //Perlin noise update
-        this.perlin.update(dt);
-
-        //update objects included scene
-        this.scene.children.forEach((brush, idx) => {
-            if(brush.update) {
-                var midi = 0.0;
-                if(!this.tracks[idx]) midi = 0.0;
-                else midi =  this.tracks[idx].event.midi;
-                brush.update(t, dt, midi / 100.0);
-            }
-        });
-
-        //update canvas
-        this.canvas.update(dt);
-
-        //render 
-        this.canvas.render(this.scene, this.camera);
-    }
-}
-
-
-/* harmony default export */ __webpack_exports__["a"] = (Visual);
-
-/***/ }),
-/* 3 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -44336,11 +44172,177 @@ function CanvasRenderer() {
 
 
 /***/ }),
+/* 1 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__midi_track_js__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__visual_js__ = __webpack_require__(3);
+
+
+
+
+
+const button = document.querySelector("button");
+button.addEventListener("click", function(){
+	if (Tone.Transport.state === "started"){
+		Tone.Transport.stop();
+		button.textContent = "START";
+	} else {
+		Tone.Transport.start("+0.1", 0);
+		button.textContent = "STOP";
+	}
+});
+
+
+//Midi file Load... and...
+var Miditracks = [];
+MidiConvert.load("res/MIDI_sample.mid").then(function(midi){
+
+	//You have to check tracks for making notes.
+	console.log(midi);
+
+	// play each tracks with each sound
+	midi.tracks.forEach((track)=>{
+		Miditracks.push(new __WEBPACK_IMPORTED_MODULE_0__midi_track_js__["a" /* default */](4, Tone.Synth, track.notes));
+	})
+	
+	Tone.Transport.bpm.value = midi.bpm;
+	Tone.Transport.timeSignature = midi.timeSignature;
+	button.classList.add("active")
+});
+
+
+
+//Visual Effect
+(function() {
+    this.setup();
+    this.animate(0, 0);
+}).bind({
+    setup : function() {
+        this.main = new __WEBPACK_IMPORTED_MODULE_1__visual_js__["a" /* default */](Miditracks);
+    },
+
+    update : function(t, dt) {
+        this.main.update(t, dt);
+    },
+
+    animate : function(oldt, nowt) {
+        this.update(nowt * 0.001, (nowt - oldt) * 0.001);
+        requestAnimationFrame(this.animate.bind(this, nowt));
+    }
+})();
+
+/***/ }),
+/* 2 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+
+class Track extends Tone.PolySynth{
+    constructor(polyphony, voice, notes) {
+        super(polyphony, voice);
+        this.track = new Tone.Part(this.playNote.bind(this), notes).start(0);
+        this.master = this.toMaster();
+        
+        this.event = {midi : 0};
+    }
+
+    playNote(time, event) {
+        this.master.triggerAttackRelease(event.name, event.duration, time, event.velocity);
+        this.event = event;
+        setTimeout(
+            ((midi)=>{ 
+                if(this.event.midi == midi) this.event = {midi : 0};
+            }).bind(this, this.event.midi), 
+            event.duration * 1000.0);
+    }
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Track;
+;
+
+/***/ }),
+/* 3 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__perlin_perlin_js__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__visual_canvas_js__ = __webpack_require__(8);
+
+
+
+
+
+
+class Visual {
+    constructor(tracks) {
+        //Setup Size for render
+        this.resolution = {width : 900, height : 900};
+
+        //Setup Renderer
+        this.rdrr = new __WEBPACK_IMPORTED_MODULE_0_three__["o" /* WebGLRenderer */]({ alpha: false, antialias: true });
+        this.rdrr.setSize(this.resolution.width, this.resolution.height);
+        document.body.appendChild(this.rdrr.domElement);
+
+        //Setup perlin noise
+        this.perlin = new __WEBPACK_IMPORTED_MODULE_1__perlin_perlin_js__["a" /* default */]({rdrr : this.rdrr, gridWidth : 16, gridHeight : 16, texWidth : 64, texHeight : 64});
+
+        //Setup Scene & add brushes
+        this.scene = new __WEBPACK_IMPORTED_MODULE_0_three__["k" /* Scene */]();
+        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x : - 6.25, y : 2.0}, this.rdrr, this.perlin));
+        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x : - 3.75, y : 2.0}, this.rdrr, this.perlin));
+        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x : - 1.25, y : 2.0}, this.rdrr, this.perlin));
+        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x :   1.25, y : 2.0}, this.rdrr, this.perlin));
+        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x :   3.75, y : 2.0}, this.rdrr, this.perlin));
+        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x :   6.25, y : 2.0}, this.rdrr, this.perlin));
+
+        //Setup Camera
+        this.camera = new __WEBPACK_IMPORTED_MODULE_0_three__["h" /* PerspectiveCamera */](45, this.resolution.width/ this.resolution.height, 1.0, 1000.0);
+        this.camera.position.z = 20.0;
+
+        //Setup Canvas 
+        //it's made for brush effect (unerasing)
+        this.canvas = new __WEBPACK_IMPORTED_MODULE_3__visual_canvas_js__["a" /* default */](this.rdrr, this.perlin);
+
+        //Get Tracks for Pitches
+        this.tracks = tracks;
+    }   
+
+    update(t, dt) {
+        //Perlin noise update
+        this.perlin.update(dt);
+
+        //update objects included scene
+        this.scene.children.forEach((brush, idx) => {
+            if(brush.update) {
+                var midi = 0.0;
+                if(!this.tracks[idx]) midi = 0.0;
+                else midi =  this.tracks[idx].event.midi;
+                brush.update(t, dt, midi / 100.0);
+            }
+        });
+
+        //update canvas
+        this.canvas.update(dt);
+
+        //render 
+        this.canvas.render(this.scene, this.camera);
+    }
+}
+
+
+/* harmony default export */ __webpack_exports__["a"] = (Visual);
+
+/***/ }),
 /* 4 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__grid_js__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__flow_js__ = __webpack_require__(6);
 
@@ -44399,7 +44401,7 @@ class Perlin {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three__ = __webpack_require__(0);
 
 
 /* Texture that get information of Grid */
@@ -44533,7 +44535,7 @@ class Grid {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three__ = __webpack_require__(0);
 
 
 class Flow {
@@ -44640,7 +44642,7 @@ class Flow {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three__ = __webpack_require__(0);
 
 // import Perlin from "./../perlin/perlin.js"
 
@@ -44669,7 +44671,7 @@ float EdgeClamper(vec2 st) {
 }
 
 void main(void) {
-    float alpha = texture2D(uPerlin, vtex).g * uAlpha * EdgeClamper(vtex);
+    float alpha = uAlpha * EdgeClamper(vtex);
     alpha = smoothstep(uClamp - 0.1, uClamp + 0.1, alpha);
     gl_FragColor = vec4(uColor, alpha);
 }
@@ -44697,13 +44699,19 @@ class Brush extends __WEBPACK_IMPORTED_MODULE_0_three__["g" /* Object3D */]{
         //intialization about perlin noise
         // this.perlin = new Perlin({ rdrr : rdrr, width : 16, height : 16});
 
+        
+        this.color = [
+            Math.random() * 0.5 + 0.5, 
+            Math.random() * 0.5 + 0.5, 
+            Math.random() * 0.5 + 0.5
+        ];
+
+        this.uColor = [0.5, 0.5, 0.5,]
+
         //initailization about uniforms
         this.uniforms = {
             uPerlin : { type : "t", value : perlin.texture},
-            uColor : { type : "3f", value : [
-                Math.random() * 0.5 + 0.5, 
-                Math.random() * 0.5 + 0.5, 
-                Math.random() * 0.5 + 0.5]},
+            uColor : { type : "3f", value : this.uColor},
             uTime : { type : "1f", value : 0.0},
             uClamp : { type : "1f", value : 0.7},
             uAlpha : { type : "1f", value : 1.0}
@@ -44735,7 +44743,7 @@ class Brush extends __WEBPACK_IMPORTED_MODULE_0_three__["g" /* Object3D */]{
 
         this._seed = { 
             clp : Math.random() + 1.0,
-            scl : 1.0 + Math.random() * 0.2, 
+            scl : 0.5 + Math.random() * 0.2, 
             xpiv : pos.x + len * Math.sin(rad), ypiv : pos.y + len * Math.cos(rad),
             xscl : 10.5, xlamb : Math.random(), xfreq : 0.5 + Math.random(),
             yscl : 10.5, ylamb : Math.random(), yfreq : 0.5 + Math.random() 
@@ -44745,11 +44753,11 @@ class Brush extends __WEBPACK_IMPORTED_MODULE_0_three__["g" /* Object3D */]{
     update(t, dt, fft) {
         // this.perlin.update(dt);
         // console.log(fft);
-        this._position.x = this._seed.xpiv + (fft * 5.0) * Math.sin(this._seed.xlamb + this._seed.xfreq * t * Math.PI);
-        this._position.y = this._seed.ypiv + (fft * 5.0) * Math.cos(this._seed.ylamb + this._seed.yfreq * t * Math.PI);
+        this._position.x = this._seed.xpiv + (fft * 3.0) * Math.sin(this._seed.xlamb + this._seed.xfreq * t * Math.PI);
+        this._position.y = (this._seed.ypiv + fft) + (fft * 3.0) * Math.cos(this._seed.ylamb + this._seed.yfreq * t * Math.PI);
 
-        this._scale.x = this._seed.scl * fft + Math.random() * 0.2;
-        this._scale.y = this._seed.scl * fft + Math.random() * 0.2;
+        this._scale.x = this._seed.scl * fft * fft + Math.random() * 0.2;
+        this._scale.y = this._seed.scl * fft * fft + Math.random() * 0.2;
 
         this._rotation.z = Math.random() * Math.PI * 4.0;
 
@@ -44762,6 +44770,10 @@ class Brush extends __WEBPACK_IMPORTED_MODULE_0_three__["g" /* Object3D */]{
 
         this.rotation.z += (this._rotation.z - this.rotation.z) * dt * 1.0;
 
+        this.uColor[0] += (this.color[0] + fft - this.uColor[0]) * dt * 5.0;
+        this.uColor[1] += (this.color[1] + fft - this.uColor[1]) * dt * 5.0;
+        this.uColor[2] += (this.color[2] + fft - this.uColor[2]) * dt * 5.0;
+        
         this.uniforms.uTime.value += dt;
         this.uniforms.uClamp.value = 0.2 + 0.8 * fft;//Math.sin(t * Math.PI * this._seed.clp) * 0.2 + ;
         // this.uniforms.uAlpha.value = 
@@ -44776,7 +44788,7 @@ class Brush extends __WEBPACK_IMPORTED_MODULE_0_three__["g" /* Object3D */]{
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three__ = __webpack_require__(0);
 
 
 
@@ -44795,9 +44807,8 @@ vec4 blur(vec2 st, vec2 ns) {
     vec3 offset = vec3(1.0, 0.0, -1.0);
     vec4 retcol = vec4(0.0);
     float ap = 0.01;
-
+    
     retcol += texture2D(uPrevTexture, st) * 4.0 ;
-
     ap = max(ap, retcol.a);
     
     retcol += 
@@ -44814,6 +44825,24 @@ vec4 blur(vec2 st, vec2 ns) {
     return retcol / 16.0;
 }
 
+float glow(vec2 st) {
+    return smoothstep(
+        length(vec3(0.01)), 
+        length(vec3(0.02)), 
+        length(texture2D(uCurrTexture, st).rgb));
+}
+float glowblur(vec2 st) {
+    float retcol = 0.0;
+    float rate = 0.0;
+    for(float idx = 1.0; idx <= 8.0 ; idx += 1.0) {
+        float rt = 8.0 / idx;
+        retcol += glow(st - vec2(0.5 + idx * 1.0, 0.0) / uResolution) * rt;
+        retcol += glow(st + vec2(0.5 + idx * 1.0, 0.0) / uResolution) * rt;
+        rate += rt * 2.0;
+    }
+    return retcol / rate;
+}
+
 void main(void) {
     vec4 perlin = texture2D(uPerlinTexture, vtex);
     vec2 noisSt = perlin.x * 8.0 * vec2(
@@ -44824,11 +44853,13 @@ void main(void) {
     vec2 currSt = vtex;
 
     vec4 prevColor = blur(prevSt , noisSt);
-    vec4 currColor = texture2D(uCurrTexture, currSt);
-
     prevColor.a *= 1.0 - uDelta;
-
-    gl_FragColor = max(prevColor, currColor);
+    
+    vec4 currColor = texture2D(uCurrTexture, currSt);
+    
+    vec4 retColor = max(prevColor, currColor); 
+    retColor = mix(retColor, vec4(1.0), glowblur(vtex));
+    gl_FragColor = retColor;
 }
 `;
 
