@@ -84,10 +84,17 @@ export default class Brush extends THREE.Object3D{
         ));
 
         this._scale = new THREE.Vector3(0.0);
+        this.scale.x = 0.001;
+        this.scale.y = 0.001;
 
-        this._position = new THREE.Vector3(0.0);
+        this._position = new THREE.Vector3(pos.x, pos.y, 0.0);
+        this.position.x = pos.x;
+        this.position.y = pos.y;
+        this.position.z = 0.0;
+
         this._velocity = new THREE.Vector3(0.0);
         this._rotation = new THREE.Vector3(0.0);
+
 
         const len = 0.0;//Math.random() * 5.0 + 1.0;
         const rad = 0.0;//Math.random() * 2.0 * Math.PI;
@@ -106,6 +113,7 @@ export default class Brush extends THREE.Object3D{
     }
 
     update(t, dt, fft) {
+        if(dt > 0.1) dt = 0.0;
         // this.perlin.update(dt);
         // console.log(fft);
         this._position.x = this._seed.xpiv + (fft * 3.0) * Math.sin(this._seed.xlamb + this._seed.xfreq * t * Math.PI);

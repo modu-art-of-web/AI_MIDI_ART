@@ -36,17 +36,17 @@ vec4 blur(vec2 st, vec2 ns) {
 
 float glow(vec2 st) {
     return smoothstep(
-        length(vec3(0.01)), 
-        length(vec3(0.02)), 
+        length(vec3(0.9)), 
+        length(vec3(1.0)), 
         length(texture2D(uCurrTexture, st).rgb));
 }
 float glowblur(vec2 st) {
     float retcol = 0.0;
     float rate = 0.0;
-    for(float idx = 1.0; idx <= 8.0 ; idx += 1.0) {
+    for(float idx = 1.0; idx <= 32.0 ; idx += 1.0) {
         float rt = 8.0 / idx;
-        retcol += glow(st - vec2(0.5 + idx * 1.0, 0.0) / uResolution) * rt;
-        retcol += glow(st + vec2(0.5 + idx * 1.0, 0.0) / uResolution) * rt;
+        retcol += glow(st - vec2(0.5 + idx * 4.0, 0.0) / uResolution) * rt;
+        retcol += glow(st + vec2(0.5 + idx * 4.0, 0.0) / uResolution) * rt;
         rate += rt * 2.0;
     }
     return retcol / rate;
@@ -67,7 +67,7 @@ void main(void) {
     vec4 currColor = texture2D(uCurrTexture, currSt);
     
     vec4 retColor = max(prevColor, currColor); 
-    retColor = mix(retColor, vec4(1.0), glowblur(vtex));
+    // retColor = mix(retColor, vec4(1.0), glowblur(vtex));
     gl_FragColor = retColor;
 }
 `;

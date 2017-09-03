@@ -10,9 +10,15 @@ class Visual {
         this.resolution = {width : 900, height : 900};
 
         //Setup Renderer
-        this.rdrr = new THREE.WebGLRenderer({ alpha: false, antialias: true });
+        this.rdrr = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         this.rdrr.setSize(this.resolution.width, this.resolution.height);
-        document.body.appendChild(this.rdrr.domElement);
+
+        this.rdrr.domElement.style.marginLeft = (window.innerWidth - this.resolution.width) * 0.15 + "px";
+        this.rdrr.domElement.style.marginTop = (window.innerHeight - this.resolution.height) * 0.5 + "px";
+        this.rdrr.domElement.style.boxShadow = "5px 5px 40px #AAAAAA";
+
+        console.log(document.getElementById("main_canvas"));
+        document.getElementById("main_canvas").appendChild(this.rdrr.domElement);
 
         //Setup perlin noise
         this.perlin = new Perlin({rdrr : this.rdrr, gridWidth : 16, gridHeight : 16, texWidth : 64, texHeight : 64});

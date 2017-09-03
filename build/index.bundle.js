@@ -44187,13 +44187,21 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 const button = document.querySelector("button");
 button.addEventListener("click", function(){
 	if (Tone.Transport.state === "started"){
-		Tone.Transport.stop();
-		button.textContent = "START";
+		// button.textContent = "START";
+		stop();
 	} else {
-		Tone.Transport.start("+0.1", 0);
-		button.textContent = "STOP";
+		// button.textContent = "STOP";
+		start();
 	}
 });
+
+function stop() {
+	Tone.Transport.stop();
+}
+
+function start() {
+	Tone.Transport.start("+0.1", 0);
+}
 
 
 //Midi file Load... and...
@@ -44210,7 +44218,7 @@ MidiConvert.load("res/MIDI_sample.mid").then(function(midi){
 	
 	Tone.Transport.bpm.value = midi.bpm;
 	Tone.Transport.timeSignature = midi.timeSignature;
-	button.classList.add("active")
+	// button.classList.add("active")
 });
 
 
@@ -44284,9 +44292,15 @@ class Visual {
         this.resolution = {width : 900, height : 900};
 
         //Setup Renderer
-        this.rdrr = new __WEBPACK_IMPORTED_MODULE_0_three__["o" /* WebGLRenderer */]({ alpha: false, antialias: true });
+        this.rdrr = new __WEBPACK_IMPORTED_MODULE_0_three__["o" /* WebGLRenderer */]({ alpha: true, antialias: true });
         this.rdrr.setSize(this.resolution.width, this.resolution.height);
-        document.body.appendChild(this.rdrr.domElement);
+
+        this.rdrr.domElement.style.marginLeft = (window.innerWidth - this.resolution.width) * 0.15 + "px";
+        this.rdrr.domElement.style.marginTop = (window.innerHeight - this.resolution.height) * 0.5 + "px";
+        this.rdrr.domElement.style.boxShadow = "5px 5px 40px #AAAAAA";
+
+        console.log(document.getElementById("main_canvas"));
+        document.getElementById("main_canvas").appendChild(this.rdrr.domElement);
 
         //Setup perlin noise
         this.perlin = new __WEBPACK_IMPORTED_MODULE_1__perlin_perlin_js__["a" /* default */]({rdrr : this.rdrr, gridWidth : 16, gridHeight : 16, texWidth : 64, texHeight : 64});
@@ -44729,10 +44743,17 @@ class Brush extends __WEBPACK_IMPORTED_MODULE_0_three__["g" /* Object3D */]{
         ));
 
         this._scale = new __WEBPACK_IMPORTED_MODULE_0_three__["m" /* Vector3 */](0.0);
+        this.scale.x = 0.001;
+        this.scale.y = 0.001;
 
-        this._position = new __WEBPACK_IMPORTED_MODULE_0_three__["m" /* Vector3 */](0.0);
+        this._position = new __WEBPACK_IMPORTED_MODULE_0_three__["m" /* Vector3 */](pos.x, pos.y, 0.0);
+        this.position.x = pos.x;
+        this.position.y = pos.y;
+        this.position.z = 0.0;
+
         this._velocity = new __WEBPACK_IMPORTED_MODULE_0_three__["m" /* Vector3 */](0.0);
         this._rotation = new __WEBPACK_IMPORTED_MODULE_0_three__["m" /* Vector3 */](0.0);
+
 
         const len = 0.0;//Math.random() * 5.0 + 1.0;
         const rad = 0.0;//Math.random() * 2.0 * Math.PI;
@@ -44751,6 +44772,7 @@ class Brush extends __WEBPACK_IMPORTED_MODULE_0_three__["g" /* Object3D */]{
     }
 
     update(t, dt, fft) {
+        if(dt > 0.1) dt = 0.0;
         // this.perlin.update(dt);
         // console.log(fft);
         this._position.x = this._seed.xpiv + (fft * 3.0) * Math.sin(this._seed.xlamb + this._seed.xfreq * t * Math.PI);
@@ -44827,17 +44849,17 @@ vec4 blur(vec2 st, vec2 ns) {
 
 float glow(vec2 st) {
     return smoothstep(
-        length(vec3(0.01)), 
-        length(vec3(0.02)), 
+        length(vec3(0.9)), 
+        length(vec3(1.0)), 
         length(texture2D(uCurrTexture, st).rgb));
 }
 float glowblur(vec2 st) {
     float retcol = 0.0;
     float rate = 0.0;
-    for(float idx = 1.0; idx <= 8.0 ; idx += 1.0) {
+    for(float idx = 1.0; idx <= 32.0 ; idx += 1.0) {
         float rt = 8.0 / idx;
-        retcol += glow(st - vec2(0.5 + idx * 1.0, 0.0) / uResolution) * rt;
-        retcol += glow(st + vec2(0.5 + idx * 1.0, 0.0) / uResolution) * rt;
+        retcol += glow(st - vec2(0.5 + idx * 4.0, 0.0) / uResolution) * rt;
+        retcol += glow(st + vec2(0.5 + idx * 4.0, 0.0) / uResolution) * rt;
         rate += rt * 2.0;
     }
     return retcol / rate;
@@ -44858,7 +44880,7 @@ void main(void) {
     vec4 currColor = texture2D(uCurrTexture, currSt);
     
     vec4 retColor = max(prevColor, currColor); 
-    retColor = mix(retColor, vec4(1.0), glowblur(vtex));
+    // retColor = mix(retColor, vec4(1.0), glowblur(vtex));
     gl_FragColor = retColor;
 }
 `;

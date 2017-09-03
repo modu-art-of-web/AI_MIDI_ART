@@ -6,13 +6,21 @@ import Visual from "./visual.js"
 const button = document.querySelector("button");
 button.addEventListener("click", function(){
 	if (Tone.Transport.state === "started"){
-		Tone.Transport.stop();
-		button.textContent = "START";
+		// button.textContent = "START";
+		stop();
 	} else {
-		Tone.Transport.start("+0.1", 0);
-		button.textContent = "STOP";
+		// button.textContent = "STOP";
+		start();
 	}
 });
+
+function stop() {
+	Tone.Transport.stop();
+}
+
+function start() {
+	Tone.Transport.start("+0.1", 0);
+}
 
 
 //Midi file Load... and...
@@ -29,7 +37,7 @@ MidiConvert.load("res/MIDI_sample.mid").then(function(midi){
 	
 	Tone.Transport.bpm.value = midi.bpm;
 	Tone.Transport.timeSignature = midi.timeSignature;
-	button.classList.add("active")
+	// button.classList.add("active")
 });
 
 
