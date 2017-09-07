@@ -44280,11 +44280,14 @@ class Track extends Tone.PolySynth{
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__perlin_perlin_js__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__visual_canvas_js__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__visual_background_js__ = __webpack_require__(9);
 
 
 
 
 
+
+// import Bacgkround from "./visual/bacgkround.js"
 
 class Visual {
     constructor(tracks) {
@@ -44307,12 +44310,12 @@ class Visual {
 
         //Setup Scene & add brushes
         this.scene = new __WEBPACK_IMPORTED_MODULE_0_three__["k" /* Scene */]();
-        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x : - 6.25, y : 2.0}, this.rdrr, this.perlin));
-        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x : - 3.75, y : 2.0}, this.rdrr, this.perlin));
-        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x : - 1.25, y : 2.0}, this.rdrr, this.perlin));
-        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x :   1.25, y : 2.0}, this.rdrr, this.perlin));
-        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x :   3.75, y : 2.0}, this.rdrr, this.perlin));
-        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x :   6.25, y : 2.0}, this.rdrr, this.perlin));
+        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x : - 6.25, y : 2.0}, this.rdrr));
+        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x : - 3.75, y : 2.0}, this.rdrr));
+        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x : - 1.25, y : 2.0}, this.rdrr));
+        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x :   1.25, y : 2.0}, this.rdrr));
+        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x :   3.75, y : 2.0}, this.rdrr));
+        this.scene.add(new __WEBPACK_IMPORTED_MODULE_2__visual_brush_js__["a" /* default */]({x :   6.25, y : 2.0}, this.rdrr));
 
         //Setup Camera
         this.camera = new __WEBPACK_IMPORTED_MODULE_0_three__["h" /* PerspectiveCamera */](45, this.resolution.width/ this.resolution.height, 1.0, 1000.0);
@@ -44321,6 +44324,8 @@ class Visual {
         //Setup Canvas 
         //it's made for brush effect (unerasing)
         this.canvas = new __WEBPACK_IMPORTED_MODULE_3__visual_canvas_js__["a" /* default */](this.rdrr, this.perlin);
+
+        this.backgr = new __WEBPACK_IMPORTED_MODULE_4__visual_background_js__["a" /* default */](this.perlin.texture, this.canvas.texture);
 
         //Get Tracks for Pitches
         this.tracks = tracks;
@@ -44345,6 +44350,7 @@ class Visual {
 
         //render 
         this.canvas.render(this.scene, this.camera);
+        this.backgr.render(this.rdrr);
     }
 }
 
@@ -44662,7 +44668,6 @@ class Flow {
 
 //bursh fragment Shader
 const fragmentShader = `
-uniform sampler2D uPerlin;
 uniform vec3 uColor;
 uniform float uAlpha;
 uniform float uClamp;
@@ -44705,7 +44710,7 @@ void main(void) {
 
 
 class Brush extends __WEBPACK_IMPORTED_MODULE_0_three__["g" /* Object3D */]{
-    constructor(pos, rdrr, perlin) {
+    constructor(pos, rdrr) {
         super();
         //intialization renderer
         this.rdrr = rdrr;
@@ -44724,7 +44729,6 @@ class Brush extends __WEBPACK_IMPORTED_MODULE_0_three__["g" /* Object3D */]{
 
         //initailization about uniforms
         this.uniforms = {
-            uPerlin : { type : "t", value : perlin.texture},
             uColor : { type : "3f", value : this.uColor},
             uTime : { type : "1f", value : 0.0},
             uClamp : { type : "1f", value : 0.7},
@@ -44976,8 +44980,8 @@ class Canvas {
         //save mixed texture curr & prev
         this.rdrr.render(this.scene, this.camera, this.target);
 
-        //render mixed texture curr & prev
-        this.rdrr.render(this.rencn, this.camera);
+        // //render mixed texture curr & prev
+        // this.rdrr.render(this.rencn, this.camera);
     }
 
     swap() { this.rttidx = this.previdx; }
@@ -44990,6 +44994,67 @@ class Canvas {
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Canvas;
 
+
+/***/ }),
+/* 9 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three__ = __webpack_require__(0);
+
+
+const fragmentShader = `
+uniform sampler2D uPerlin;
+uniform sampler2D uCanvas;
+varying vec2 vtex;
+void main(void) {
+    vec4 backColor = texture2D(uPerlin, vtex);
+    vec4 forgColor = texture2D(uCanvas, vtex);
+    vec3 currColor = mix(forgColor.rgb, backColor.rgb, forgColor.a);
+    gl_FragColor = vec4(currColor, 1.0);
+}
+`;
+
+const vertexShader = `
+varying vec2 vtex;
+void main(void) {
+    vtex = uv;
+    gl_Position = vec4(position, 1.0);
+}
+`;
+
+/* harmony default export */ __webpack_exports__["a"] = (class extends __WEBPACK_IMPORTED_MODULE_0_three__["g" /* Object3D */] {
+    constructor(perlin, canvas) {
+        super();
+        
+
+        //default scene
+        this.add(new __WEBPACK_IMPORTED_MODULE_0_three__["d" /* Mesh */](
+            new __WEBPACK_IMPORTED_MODULE_0_three__["i" /* PlaneGeometry */](2.0, 2.0),
+            new __WEBPACK_IMPORTED_MODULE_0_three__["l" /* ShaderMaterial */]({
+                uniforms : {
+                    uPerlin : { type : "t", value : perlin},
+                    uCanvas : { type : "t", value : canvas}
+                },
+                fragmentShader, vertexShader
+            })
+        ));
+
+        //default camera
+        this.camera = new __WEBPACK_IMPORTED_MODULE_0_three__["a" /* Camera */]();
+
+        //default scene
+        this.scene =new __WEBPACK_IMPORTED_MODULE_0_three__["k" /* Scene */]();
+
+        //added this Object
+        this.scene.add(this);
+    }
+
+    render(rdrr) {
+        rdrr.render(this.scene, this.camera);
+    }
+
+});
 
 /***/ })
 /******/ ]);

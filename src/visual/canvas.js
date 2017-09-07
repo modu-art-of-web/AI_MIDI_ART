@@ -163,8 +163,8 @@ export default class Canvas {
         //save mixed texture curr & prev
         this.rdrr.render(this.scene, this.camera, this.target);
 
-        //render mixed texture curr & prev
-        this.rdrr.render(this.rencn, this.camera);
+        // //render mixed texture curr & prev
+        // this.rdrr.render(this.rencn, this.camera);
     }
 
     swap() { this.rttidx = this.previdx; }

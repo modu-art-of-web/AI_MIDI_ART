@@ -3,7 +3,6 @@ import * as THREE from "three"
 
 //bursh fragment Shader
 const fragmentShader = `
-uniform sampler2D uPerlin;
 uniform vec3 uColor;
 uniform float uAlpha;
 uniform float uClamp;
@@ -46,7 +45,7 @@ void main(void) {
 
 
 export default class Brush extends THREE.Object3D{
-    constructor(pos, rdrr, perlin) {
+    constructor(pos, rdrr) {
         super();
         //intialization renderer
         this.rdrr = rdrr;
@@ -65,7 +64,6 @@ export default class Brush extends THREE.Object3D{
 
         //initailization about uniforms
         this.uniforms = {
-            uPerlin : { type : "t", value : perlin.texture},
             uColor : { type : "3f", value : this.uColor},
             uTime : { type : "1f", value : 0.0},
             uClamp : { type : "1f", value : 0.7},

@@ -3,6 +3,8 @@ import * as THREE from "three"
 import Perlin from "./perlin/perlin.js"
 import Brush from "./visual/brush.js"
 import Canvas from "./visual/canvas.js"
+import background from "./visual/background.js"
+// import Bacgkround from "./visual/bacgkround.js"
 
 class Visual {
     constructor(tracks) {
@@ -25,12 +27,12 @@ class Visual {
 
         //Setup Scene & add brushes
         this.scene = new THREE.Scene();
-        this.scene.add(new Brush({x : - 6.25, y : 2.0}, this.rdrr, this.perlin));
-        this.scene.add(new Brush({x : - 3.75, y : 2.0}, this.rdrr, this.perlin));
-        this.scene.add(new Brush({x : - 1.25, y : 2.0}, this.rdrr, this.perlin));
-        this.scene.add(new Brush({x :   1.25, y : 2.0}, this.rdrr, this.perlin));
-        this.scene.add(new Brush({x :   3.75, y : 2.0}, this.rdrr, this.perlin));
-        this.scene.add(new Brush({x :   6.25, y : 2.0}, this.rdrr, this.perlin));
+        this.scene.add(new Brush({x : - 6.25, y : 2.0}, this.rdrr));
+        this.scene.add(new Brush({x : - 3.75, y : 2.0}, this.rdrr));
+        this.scene.add(new Brush({x : - 1.25, y : 2.0}, this.rdrr));
+        this.scene.add(new Brush({x :   1.25, y : 2.0}, this.rdrr));
+        this.scene.add(new Brush({x :   3.75, y : 2.0}, this.rdrr));
+        this.scene.add(new Brush({x :   6.25, y : 2.0}, this.rdrr));
 
         //Setup Camera
         this.camera = new THREE.PerspectiveCamera(45, this.resolution.width/ this.resolution.height, 1.0, 1000.0);
@@ -39,6 +41,8 @@ class Visual {
         //Setup Canvas 
         //it's made for brush effect (unerasing)
         this.canvas = new Canvas(this.rdrr, this.perlin);
+
+        this.backgr = new background(this.perlin.texture, this.canvas.texture);
 
         //Get Tracks for Pitches
         this.tracks = tracks;
@@ -63,6 +67,7 @@ class Visual {
 
         //render 
         this.canvas.render(this.scene, this.camera);
+        this.backgr.render(this.rdrr);
     }
 }
 
