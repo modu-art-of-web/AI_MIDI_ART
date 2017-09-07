@@ -44289,10 +44289,10 @@ class Track extends Tone.PolySynth{
 class Visual {
     constructor(tracks) {
         //Setup Size for render
-        this.resolution = {width : 900, height : 900};
+        this.resolution = {width : window.innerWidth * 0.4, height : window.innerWidth * 0.4};
 
         //Setup Renderer
-        this.rdrr = new __WEBPACK_IMPORTED_MODULE_0_three__["o" /* WebGLRenderer */]({ alpha: true, antialias: true });
+        this.rdrr = new __WEBPACK_IMPORTED_MODULE_0_three__["o" /* WebGLRenderer */]({ alpha: false, antialias: true });
         this.rdrr.setSize(this.resolution.width, this.resolution.height);
 
         this.rdrr.domElement.style.marginLeft = (window.innerWidth - this.resolution.width) * 0.15 + "px";

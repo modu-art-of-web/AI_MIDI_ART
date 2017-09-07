@@ -7,10 +7,10 @@ import Canvas from "./visual/canvas.js"
 class Visual {
     constructor(tracks) {
         //Setup Size for render
-        this.resolution = {width : 900, height : 900};
+        this.resolution = {width : window.innerWidth * 0.4, height : window.innerWidth * 0.4};
 
         //Setup Renderer
-        this.rdrr = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        this.rdrr = new THREE.WebGLRenderer({ alpha: false, antialias: true });
         this.rdrr.setSize(this.resolution.width, this.resolution.height);
 
         this.rdrr.domElement.style.marginLeft = (window.innerWidth - this.resolution.width) * 0.15 + "px";
