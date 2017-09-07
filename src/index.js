@@ -1,38 +1,62 @@
- const synth = new Tone.PolySynth(8, Tone.Synth, {
-			"oscillator": {
-				"type": "sine3"
-			},
-			"envelope": {
-				"attack": 0.03,
-				"decay": 0.1,
-				"sustain": 0.2,
-				"release": 0.6
-			}
-		}).toMaster();
 
-function playNote(time, event){
-	synth.triggerAttackRelease(event.name, event.duration, time, event.velocity);
-}
+import Track from "./midi/track.js"
+import Visual from "./visual.js"
+
 
 const button = document.querySelector("button");
 button.addEventListener("click", function(){
 	if (Tone.Transport.state === "started"){
-		Tone.Transport.stop();
-		button.textContent = "START";
+		// button.textContent = "START";
+		stop();
 	} else {
-		Tone.Transport.start("+0.1", 0);
-		button.textContent = "STOP";
+		// button.textContent = "STOP";
+		start();
 	}
 });
-MidiConvert.load("../res/MIDI_sample.mid").then(function(midi){
 
-	// play right and left hand with a poly synth
-	const rightHand = midi.get("Piano").notes;
-	const leftHand = midi.get("Bass").notes;
-	// make sure you set the tempo before you schedule the events
+function stop() {
+	Tone.Transport.stop();
+}
+
+function start() {
+	Tone.Transport.start("+0.1", 0);
+}
+
+
+//Midi file Load... and...
+var Miditracks = [];
+MidiConvert.load("res/MIDI_sample.mid").then(function(midi){
+
+	//You have to check tracks for making notes.
+	console.log(midi);
+
+	// play each tracks with each sound
+	midi.tracks.forEach((track)=>{
+		Miditracks.push(new Track(4, Tone.Synth, track.notes));
+	})
+	
 	Tone.Transport.bpm.value = midi.bpm;
 	Tone.Transport.timeSignature = midi.timeSignature;
-	const rightHandPart = new Tone.Part(playNote, rightHand).start(0);
-	const leftHandPart = new Tone.Part(playNote, leftHand).start(0);
-	button.classList.add("active")
+	// button.classList.add("active")
 });
+
+
+
+//Visual Effect
+(function() {
+    this.setup();
+    this.animate(0, 0);
+}).bind({
+    setup : function() {
+        this.main = new Visual(Miditracks);
+    },
+
+    update : function(t, dt) {
+        this.main.update(t, dt);
+    },
+
+    animate : function(oldt, nowt) {
+        this.update(nowt * 0.001, (nowt - oldt) * 0.001);
+        requestAnimationFrame(this.animate.bind(this, nowt));
+    }
+})();

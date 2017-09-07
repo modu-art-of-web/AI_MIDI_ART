@@ -1,17 +1,48 @@
 <!DOCTYPE html>
 <html lang="en-US">
-  <head>
-    <title> MIDI Example </title>
-    <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="src/css/normalize.css">
-    <link rel="stylesheet" type="text/css" href="src/css/style.css">
-    <script src="build/MidiConvert.js"></script>
-    <script src="https://tonejs.github.io/build/Tone.js"></script>
-  </head>
-  <body>
-    <div id="Topbar"></div>
-    <div id="Description">Load and parse Bach's <i>Prelude in C</i></div>
-    <button>START</button>
-    <script src="build/index.bundle.js"></script>
-  </body>
+
+<head>
+  <title> MIDI Example </title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" type="text/css" href="css/normalize.css">
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+  <script src="libs/MidiConvert.js"></script>
+  <script src="libs/Tone.js"></script>
+</head>
+
+<body>
+  <!-- <button>START</button> -->
+
+  <div id="main_canvas"></div>
+  <div id="sub_canvas">
+    <div style="margin-left:100px; margin-top:120px; font-weight:bold; font-size:40px;">
+      <a style="color:#CCCCCC">Jet Cloud</a><br><br>
+    </div>
+    <div style="margin-left:100px; font-weight:unset; font-size:20px;">
+      <a style="color:#C1C1C1">.Donghyeon Kim </a><a style="color:#DDDDDD;font-size:15px">.InteractiveArtOfWeb, ModuLabs</a><br><br>
+      <div style="margin-left:10px; font-weight:unset; font-size:15px; color:#DDDDDD;">
+        - Interactive Visualization <br> - Art Direct <br> - Graphics Specialist <br>
+        <br><br><br>
+      </div>
+
+      <a style="color:#C1C1C1">.Sanghyun Jeon </a><a style="color:#DDDDDD;font-size:15px">.MusicProcessingLAB, ModuLabs</a><br><br>
+      <div style="margin-left:10px; font-weight:unset; font-size:15px; color:#DDDDDD;">
+        - Music Direct <br> - Sound Processing <br> - Sound Specialist<br>
+        <br><br><br>
+      </div>
+    </div>
+
+    <div style="margin-left:100px; font-weight:unset; font-size:15px; color:#DDDDDD;">
+      대형 항공기 엔진에서 나오는 구름의 형상을 소리에 맞추에 반응하는 Media Art<br>
+      <br><br><br>
+    </div>
+
+    <div style="margin-left:100px; font-weight:unset; font-size:15px; color:#DDDDDD;">
+      <button>Play "sample midi"</button>
+    </div>
+  </div>
+
+  <script src="build/index.bundle.js"></script>
+</body>
+
 </html>
