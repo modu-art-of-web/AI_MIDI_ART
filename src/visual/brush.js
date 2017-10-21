@@ -45,7 +45,7 @@ void main(void) {
 
 
 export default class Brush extends THREE.Object3D{
-    constructor(pos, rdrr) {
+    constructor(idx, pos, rdrr) {
         super();
         //intialization renderer
         this.rdrr = rdrr;
@@ -55,10 +55,13 @@ export default class Brush extends THREE.Object3D{
 
         
         this.color = [
-            Math.random() * 0.5 + 0.5, 
-            Math.random() * 0.5 + 0.5, 
-            Math.random() * 0.5 + 0.5
+            Math.random() * 0.2, 
+            Math.random() * 0.2, 
+            Math.random() * 0.2
         ];
+
+        if(idx < 3) this.color[0] += 0.8;
+        else this.color[2] += 0.8;
 
         this.uColor = [0.5, 0.5, 0.5,]
 
@@ -108,10 +111,14 @@ export default class Brush extends THREE.Object3D{
             xscl : 10.5, xlamb : Math.random(), xfreq : 0.5 + Math.random(),
             yscl : 10.5, ylamb : Math.random(), yfreq : 0.5 + Math.random() 
         };
+
+        this.fft = 0.0;
     }
 
-    update(t, dt, fft) {
+    update(t, dt) {
         if(dt > 0.1) dt = 0.0;
+        // this.fft += (0.0 - this.fft) * dt;
+        const fft = this.fft;
         // this.perlin.update(dt);
         // console.log(fft);
         this._position.x = this._seed.xpiv + (fft * 3.0) * Math.sin(this._seed.xlamb + this._seed.xfreq * t * Math.PI);
@@ -139,5 +146,7 @@ export default class Brush extends THREE.Object3D{
         this.uniforms.uClamp.value = 0.2 + 0.8 * fft;//Math.sin(t * Math.PI * this._seed.clp) * 0.2 + ;
         // this.uniforms.uAlpha.value = 
     }
+    
+    set FFT(v) { this.fft = v; }
 
 };

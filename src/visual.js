@@ -4,20 +4,19 @@ import Perlin from "./perlin/perlin.js"
 import Brush from "./visual/brush.js"
 import Canvas from "./visual/canvas.js"
 import background from "./visual/background.js"
-// import Bacgkround from "./visual/bacgkround.js"
 
 class Visual {
     constructor(tracks) {
         //Setup Size for render
-        this.resolution = {width : window.innerWidth * 0.4, height : window.innerWidth * 0.4};
+        this.resolution = {width : window.innerWidth * 1.0, height : window.innerHeight * 1.0};
 
         //Setup Renderer
         this.rdrr = new THREE.WebGLRenderer({ alpha: false, antialias: true });
         this.rdrr.setSize(this.resolution.width, this.resolution.height);
 
-        this.rdrr.domElement.style.marginLeft = (window.innerWidth - this.resolution.width) * 0.15 + "px";
-        this.rdrr.domElement.style.marginTop = (window.innerHeight - this.resolution.height) * 0.5 + "px";
-        this.rdrr.domElement.style.boxShadow = "5px 5px 40px #AAAAAA";
+        // this.rdrr.domElement.style.marginLeft = (window.innerWidth - this.resolution.width) * 0.5 + "px";
+        // this.rdrr.domElement.style.marginTop = (window.innerHeight - this.resolution.height) * 0.5 + "px";
+        // this.rdrr.domElement.style.boxShadow = "5px 5px 40px #AAAAAA";
 
         console.log(document.getElementById("main_canvas"));
         document.getElementById("main_canvas").appendChild(this.rdrr.domElement);
@@ -27,12 +26,14 @@ class Visual {
 
         //Setup Scene & add brushes
         this.scene = new THREE.Scene();
-        this.scene.add(new Brush({x : - 6.25, y : 2.0}, this.rdrr));
-        this.scene.add(new Brush({x : - 3.75, y : 2.0}, this.rdrr));
-        this.scene.add(new Brush({x : - 1.25, y : 2.0}, this.rdrr));
-        this.scene.add(new Brush({x :   1.25, y : 2.0}, this.rdrr));
-        this.scene.add(new Brush({x :   3.75, y : 2.0}, this.rdrr));
-        this.scene.add(new Brush({x :   6.25, y : 2.0}, this.rdrr));
+        this.brushes = [];
+        this.brushes.push(new Brush(0, {x : - 6.25, y : 2.0}, this.rdrr));
+        this.brushes.push(new Brush(1, {x : - 3.75, y : 2.0}, this.rdrr));
+        this.brushes.push(new Brush(2, {x : - 1.25, y : 2.0}, this.rdrr));
+        this.brushes.push(new Brush(3, {x :   1.25, y : 2.0}, this.rdrr));
+        this.brushes.push(new Brush(4, {x :   3.75, y : 2.0}, this.rdrr));
+        this.brushes.push(new Brush(5, {x :   6.25, y : 2.0}, this.rdrr));
+        for(var i = 0 ; i < this.brushes.length; i++) this.scene.add(this.brushes[i]);
 
         //Setup Camera
         this.camera = new THREE.PerspectiveCamera(45, this.resolution.width/ this.resolution.height, 1.0, 1000.0);
@@ -54,12 +55,7 @@ class Visual {
 
         //update objects included scene
         this.scene.children.forEach((brush, idx) => {
-            if(brush.update) {
-                var midi = 0.0;
-                if(!this.tracks[idx]) midi = 0.0;
-                else midi =  this.tracks[idx].event.midi;
-                brush.update(t, dt, midi / 100.0);
-            }
+            if(brush.update) { brush.update(t, dt); }
         });
 
         //update canvas
@@ -68,6 +64,14 @@ class Visual {
         //render 
         this.canvas.render(this.scene, this.camera);
         this.backgr.render(this.rdrr);
+    }
+
+    setAIFFT(idx, v) { 
+        console.log(this.brushes[idx % 3 + 3].FFT)
+        this.brushes[idx % 3 + 3].FFT = v; 
+    }
+    setURFFT(idx, v) {
+        this.brushes[idx % 3].FFT = v; 
     }
 }
 
